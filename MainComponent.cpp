@@ -6,8 +6,7 @@
   ==============================================================================
 */
 
-// TODO:  morph functie, rotatie, kleuren veranderen door de slider heen, sequencer
-// Sequencer: timer maken die nieuw geluid en lichtje op een rand aanroept. Toggles op de randjes zetten om aan en uit te zetten of er een geluid gespeeld moet worden
+// TODO: set shape of corner buttons and add toggle
 
 #include "MainComponent.h"
 
@@ -15,6 +14,9 @@
 MainComponent::MainComponent()
 {
     setSize (300, 350);
+    
+    // timer for sequencer
+    Timer::startTimer(bpmInMs);
 
     // specify the number of input and output channels that we want to open
     setAudioChannels (2, 2);
@@ -23,12 +25,14 @@ MainComponent::MainComponent()
     fillButton.setButtonText ("Fill");
     fillButton.onClick = [this] { updateToggleState (&fillButton);   };
     
-    addAndMakeVisible(pointsAmountInput);
-    pointsAmountInput.setInputRestrictions(2, "0123456789");
+    for (int corner = 0; corner < maxCorners; corner++)
+    {
+        addAndMakeVisible(sequencerPointsArray[corner]);
+    }
     
     pointsAmountInputSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
     pointsAmountInputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 20);
-    pointsAmountInputSlider.setRange(3, 14, 1);
+    pointsAmountInputSlider.setRange(3, maxCorners, 1);
     pointsAmountInputSlider.setValue(pointsAmount);
     addAndMakeVisible(pointsAmountInputSlider);
     pointsAmountInputSlider.onValueChange = [this] { sliderValueChanged (&pointsAmountInputSlider);   };
@@ -73,7 +77,8 @@ void MainComponent::releaseResources()
 
 //==============================================================================
 void MainComponent::paint (Graphics& g)
-{    
+{
+    // set colours
     g.fillAll (darkBack);
     
     getLookAndFeel().setColour(Slider::thumbColourId, aqua);
@@ -83,7 +88,7 @@ void MainComponent::paint (Graphics& g)
     
     getLookAndFeel().setColour(TextButton::buttonColourId, Colour(10, 13, 39));
     getLookAndFeel().setColour(TextButton::textColourOffId, lightText); // text colour
-    
+        
     // -------------------------------------------------------------------------
     
     double theta = MathConstants<double>::twoPi;
@@ -110,10 +115,17 @@ void MainComponent::paint (Graphics& g)
         double xValue = radius * cos(angle) + centrePoint;
         double yValue = radius * sin(angle) + centrePoint;
         
+        g.setColour (red);
         pointArea.setCentre(xValue, yValue);
         g.setColour (red);
         g.fillEllipse(pointArea);
         
+        // set toggles on corners
+        sequencerPointsArray[point].setVisible(true);
+        sequencerPointsArray[point].setBounds(0, 0, 20, 20);
+        sequencerPointsArray[point].setCentrePosition(xValue, yValue);
+        
+        // line or fill
         if (point == 0)
         {
             path.startNewSubPath (xValue, yValue);
@@ -123,14 +135,13 @@ void MainComponent::paint (Graphics& g)
         }
     }
     
-//    Drawable* img = Drawable::createFromSVG(*svg);
-//    img->setTransform(AffineTransform::rotation(angle, svg_width / 2, svg_height / 2)
-//            .scaled(rw/svg_width, rw/svg_height, svg_width/2, svg_height/2));
-//    img->drawAt(g, centreX - (svg_width / 2), centreY - (svg_height / 2), 1.0f);
+    // remove unused toggles
+    for (int point = pointsAmount; point < maxCorners; point ++)
+    {
+        sequencerPointsArray[point].setVisible(false);
+    }
     
     path.closeSubPath ();
-    
-    
     
     g.setColour (pink);
     if (fillPath) {
@@ -144,12 +155,7 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     fillButton.setBounds(getWidth() - 50, 0, 50, 25);
-//    pointsAmountInput.setBounds(0, 0, 50, 50);
     pointsAmountInputSlider.setBounds(0, getHeight() - 70, getWidth(), 50);
-}
-
-void MainComponent::mouseDown (const juce::MouseEvent&)
-{
 }
 
 void MainComponent::updateToggleState (Button* button)
@@ -161,5 +167,17 @@ void MainComponent::updateToggleState (Button* button)
 void MainComponent::sliderValueChanged(Slider *slider)
 {
     pointsAmount = slider->getValue();
+    repaint();
+}
+
+void MainComponent::timerCallback()
+{
+    // walk through sequencer
+    currentBeat = (currentBeat + 1) % (int)pointsAmount;
+    for (int point = 0; point < pointsAmount; point++)
+    {
+        sequencerPointsArray[point].setToggleState((currentBeat == point) ? true : false, false);
+    }
+    
     repaint();
 }

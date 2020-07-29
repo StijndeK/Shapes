@@ -15,7 +15,7 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public AudioAppComponent
+class MainComponent   : public AudioAppComponent, public Timer
 {
 public:
     //==============================================================================
@@ -31,19 +31,25 @@ public:
     void paint (Graphics& g) override;
     void resized() override;
     
-    void mouseDown (const juce::MouseEvent&) override;
     void updateToggleState (Button* button);
     void sliderValueChanged (Slider* slider);
+    void timerCallback() override;
 
 private:
     //==============================================================================
     TextButton fillButton;
-    TextEditor pointsAmountInput;
     Slider pointsAmountInputSlider;
 
     double pointsAmount = 5;
     
     bool fillPath = true;
+    
+    int bpmInMs = 600; // 60.000 / bpm(100)
+    
+    int maxCorners = 14;
+    TextButton sequencerPointsArray[14];
+    
+    int currentBeat = 0;
     
     Colour darkBack = Colour(10, 13, 39);
     Colour lightText = Colour(255, 255, 255);
