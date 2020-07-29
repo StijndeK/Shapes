@@ -51,6 +51,10 @@ private:
     
     int currentBeat = 0;
     
+//    ShapeButton test = ShapeButton("test", Colours::black, Colours::black, Colours::black);
+    
+    ShapeButton test {"test", Colours::white, Colours::white, Colours::white};
+    
     Colour darkBack = Colour(10, 13, 39);
     Colour lightText = Colour(255, 255, 255);
     Colour pink = Colour(204, 76, 121);

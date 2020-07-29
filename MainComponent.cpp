@@ -6,7 +6,8 @@
   ==============================================================================
 */
 
-// TODO: set shape of corner buttons and add toggle
+// TODO: try shape buttons
+// TODO: add toggle functionality, by making the sequencer only changing the color of the active toggled buttons
 
 #include "MainComponent.h"
 
@@ -25,9 +26,16 @@ MainComponent::MainComponent()
     fillButton.setButtonText ("Fill");
     fillButton.onClick = [this] { updateToggleState (&fillButton);   };
     
+//    addAndMakeVisible (test);
+//    juce::Path path;
+//    path.addEllipse(0, 0, 100, 100);
+//    test.setShape(path, false, false, false);
+    
     for (int corner = 0; corner < maxCorners; corner++)
     {
         addAndMakeVisible(sequencerPointsArray[corner]);
+        sequencerPointsArray[corner].setClickingTogglesState(true);
+        sequencerPointsArray[corner].setToggleState(true, false);
     }
     
     pointsAmountInputSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
@@ -86,7 +94,8 @@ void MainComponent::paint (Graphics& g)
     getLookAndFeel().setColour(Slider::trackColourId, blue);
     getLookAndFeel().setColour(Slider::textBoxTextColourId, lightText);
     
-    getLookAndFeel().setColour(TextButton::buttonColourId, Colour(10, 13, 39));
+    getLookAndFeel().setColour(TextButton::buttonColourId, darkBack);
+    getLookAndFeel().setColour(TextButton::buttonOnColourId, aqua);
     getLookAndFeel().setColour(TextButton::textColourOffId, lightText); // text colour
         
     // -------------------------------------------------------------------------
@@ -156,6 +165,7 @@ void MainComponent::resized()
 {
     fillButton.setBounds(getWidth() - 50, 0, 50, 25);
     pointsAmountInputSlider.setBounds(0, getHeight() - 70, getWidth(), 50);
+//    test.setBounds(0, 0, 10, 50);
 }
 
 void MainComponent::updateToggleState (Button* button)
@@ -176,8 +186,18 @@ void MainComponent::timerCallback()
     currentBeat = (currentBeat + 1) % (int)pointsAmount;
     for (int point = 0; point < pointsAmount; point++)
     {
-        sequencerPointsArray[point].setToggleState((currentBeat == point) ? true : false, false);
+        if (sequencerPointsArray[point].getToggleState() == true)
+        {
+            if (currentBeat == point)
+            {
+                // set color
+                sequencerPointsArray[point].setColour(TextButton::buttonOnColourId, red);
+            }
+            else {
+                // set color
+                sequencerPointsArray[point].setColour(TextButton::buttonOnColourId, aqua);
+            }
+        }
     }
-    
     repaint();
 }
