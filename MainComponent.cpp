@@ -41,6 +41,10 @@ MainComponent::MainComponent()
     pointsAmountInputSlider.setValue(pointsAmount);
     addAndMakeVisible(pointsAmountInputSlider);
     pointsAmountInputSlider.onValueChange = [this] { sliderValueChanged (&pointsAmountInputSlider);   };
+    
+    // -------------------------------------------------------------------------
+    
+    envelope.setTimeExp(1000, 1000);
 }
 
 MainComponent::~MainComponent()

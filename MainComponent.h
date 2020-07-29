@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "Envelopes.h"
 
 //==============================================================================
 /*
@@ -66,6 +67,8 @@ private:
 
     double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
     void updateAngleDelta();
-
+    
+    Envelopes envelope;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
