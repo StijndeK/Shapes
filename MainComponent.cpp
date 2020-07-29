@@ -6,9 +6,6 @@
   ==============================================================================
 */
 
-// TODO: try shape buttons
-// TODO: add toggle functionality, by making the sequencer only changing the color of the active toggled buttons
-
 #include "MainComponent.h"
 
 //==============================================================================
@@ -55,24 +52,26 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
 {
-    // This function will be called when the audio device is started, or when
-    // its settings (i.e. sample rate, block size, etc) are changed.
-
-    // You can use this function to initialise any resources you might need,
-    // but be careful - it will be called on the audio thread, not the GUI thread.
-
-    // For more details, see the help for AudioProcessor::prepareToPlay()
+        currentSampleRate = sampleRate;
+        updateAngleDelta();
 }
 
 void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill)
 {
-    // Your audio-processing code goes here!
+    auto level = 0.125f;
+    auto* leftBuffer  = bufferToFill.buffer->getWritePointer (0, bufferToFill.startSample);
+    auto* rightBuffer = bufferToFill.buffer->getWritePointer (1, bufferToFill.startSample);
 
-    // For more details, see the help for AudioProcessor::getNextAudioBlock()
-
+    for (auto sample = 0; sample < bufferToFill.numSamples; ++sample)
+    {
+        auto currentSample = (float) std::sin (currentAngle);
+        currentAngle += angleDelta;
+        leftBuffer[sample]  = currentSample * level;
+        rightBuffer[sample] = currentSample * level;
+    }
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
-    bufferToFill.clearActiveBufferRegion();
+//    bufferToFill.clearActiveBufferRegion();
 }
 
 void MainComponent::releaseResources()
@@ -200,4 +199,13 @@ void MainComponent::timerCallback()
         }
     }
     repaint();
+}
+
+//==============================================================================
+
+void MainComponent::updateAngleDelta()
+{
+    int frequency = 500;
+    auto cyclesPerSample = frequency / currentSampleRate;         //  First we calculate the number of cycles that will need to complete for each output sample.
+    angleDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;          // Then this is multiplied by the length of a whole sine wave cycle, which is 2pi radians.
 }

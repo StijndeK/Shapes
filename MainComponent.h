@@ -50,10 +50,8 @@ private:
     TextButton sequencerPointsArray[14];
     
     int currentBeat = 0;
-    
-//    ShapeButton test = ShapeButton("test", Colours::black, Colours::black, Colours::black);
-    
-    ShapeButton test {"test", Colours::white, Colours::white, Colours::white};
+        
+//    ShapeButton test {"test", Colours::white, Colours::white, Colours::white};
     
     Colour darkBack = Colour(10, 13, 39);
     Colour lightText = Colour(255, 255, 255);
@@ -63,6 +61,11 @@ private:
     Colour blue = Colour(57, 105, 160);
     Colour darkBlue = Colour(40, 73, 127);
     Colour red = Colour(196, 74, 78);
+    
+    //------------------------------------------------------------
+
+    double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
+    void updateAngleDelta();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
