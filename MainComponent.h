@@ -40,8 +40,11 @@ private:
     //==============================================================================
     TextButton fillButton;
     Slider pointsAmountInputSlider;
+    Slider bpmSlider;
 
     double pointsAmount = 5;
+    
+    bool trigger = false;
     
     bool fillPath = true;
     
@@ -51,9 +54,7 @@ private:
     TextButton sequencerPointsArray[14];
     
     int currentBeat = 0;
-        
-//    ShapeButton test {"test", Colours::white, Colours::white, Colours::white};
-    
+            
     Colour darkBack = Colour(10, 13, 39);
     Colour lightText = Colour(255, 255, 255);
     Colour pink = Colour(204, 76, 121);

@@ -23,11 +23,6 @@ MainComponent::MainComponent()
     fillButton.setButtonText ("Fill");
     fillButton.onClick = [this] { updateToggleState (&fillButton);   };
     
-//    addAndMakeVisible (test);
-//    juce::Path path;
-//    path.addEllipse(0, 0, 100, 100);
-//    test.setShape(path, false, false, false);
-    
     for (int corner = 0; corner < maxCorners; corner++)
     {
         addAndMakeVisible(sequencerPointsArray[corner]);
@@ -42,9 +37,13 @@ MainComponent::MainComponent()
     addAndMakeVisible(pointsAmountInputSlider);
     pointsAmountInputSlider.onValueChange = [this] { sliderValueChanged (&pointsAmountInputSlider);   };
     
+//    bpmSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+//    bpmSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 20, 20);
+//    bpmSlider.setRange(40, 200)
+    
     // -------------------------------------------------------------------------
     
-    envelope.setTimeExp(1000, 1000);
+    envelope.setTimeExp(20, 200);
 }
 
 MainComponent::~MainComponent()
@@ -70,20 +69,22 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
     {
         auto currentSample = (float) std::sin (currentAngle);
         currentAngle += angleDelta;
-        leftBuffer[sample]  = currentSample * level;
-        rightBuffer[sample] = currentSample * level;
+        
+        double theSound = envelope.arExp(currentSample * level, trigger);
+        
+        leftBuffer[sample]  = theSound;
+        rightBuffer[sample] = theSound;
     }
-    // Right now we are not producing any data, in which case we need to clear the buffer
-    // (to prevent the output of random noise)
-//    bufferToFill.clearActiveBufferRegion();
+    
+    // reset trigger
+    if (trigger == 1)
+    {
+        trigger = 0;
+    }
 }
 
 void MainComponent::releaseResources()
 {
-    // This will be called when the audio device stops, or when it is being
-    // restarted due to a setting change.
-
-    // For more details, see the help for AudioProcessor::releaseResources()
 }
 
 //==============================================================================
@@ -174,6 +175,7 @@ void MainComponent::resized()
 void MainComponent::updateToggleState (Button* button)
 {
     fillPath = !fillPath;
+    trigger = !trigger;
     repaint();
 }
 
@@ -195,6 +197,7 @@ void MainComponent::timerCallback()
             {
                 // set color
                 sequencerPointsArray[point].setColour(TextButton::buttonOnColourId, red);
+                trigger = true;
             }
             else {
                 // set color

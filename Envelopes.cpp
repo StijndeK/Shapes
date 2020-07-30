@@ -22,9 +22,9 @@ double Envelopes::arExp(double input, int trigger)
             break;
         case HOLD:
             amplitude = 1;
-            if (trigger != 1) {
-                currentEnvState = RELEASE;
-            }
+//            if (trigger != 1) {
+            currentEnvState = RELEASE;
+//            }
             break;
         case RELEASE:
             amplitude *= releaseExp;
