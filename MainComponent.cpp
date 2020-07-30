@@ -8,6 +8,9 @@
 
 #include "MainComponent.h"
 
+// TODO: Env en sound maken per ding (polyfoon)
+// TODO: bpm calc function
+
 //==============================================================================
 MainComponent::MainComponent()
 {
@@ -37,9 +40,12 @@ MainComponent::MainComponent()
     addAndMakeVisible(pointsAmountInputSlider);
     pointsAmountInputSlider.onValueChange = [this] { sliderValueChanged (&pointsAmountInputSlider);   };
     
-//    bpmSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-//    bpmSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 20, 20);
-//    bpmSlider.setRange(40, 200)
+    bpmSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    bpmSlider.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+    bpmSlider.setRange(40, 300, 1);
+    bpmSlider.setValue(120);
+    addAndMakeVisible(bpmSlider);
+    bpmSlider.onValueChange = [this] { sliderValueChanged (&bpmSlider);   };
     
     // -------------------------------------------------------------------------
     
@@ -169,7 +175,7 @@ void MainComponent::resized()
 {
     fillButton.setBounds(getWidth() - 50, 0, 50, 25);
     pointsAmountInputSlider.setBounds(0, getHeight() - 70, getWidth(), 50);
-//    test.setBounds(0, 0, 10, 50);
+    bpmSlider.setBounds(0, 0, 50, 60);
 }
 
 void MainComponent::updateToggleState (Button* button)
@@ -181,8 +187,15 @@ void MainComponent::updateToggleState (Button* button)
 
 void MainComponent::sliderValueChanged(Slider *slider)
 {
-    pointsAmount = slider->getValue();
-    repaint();
+    if (slider == &pointsAmountInputSlider)
+    {
+        pointsAmount = slider->getValue();
+        repaint();
+    }
+    else {
+        bpmInMs = 60000 / slider->getValue();
+        Timer::startTimer(bpmInMs);
+    }
 }
 
 void MainComponent::timerCallback()
