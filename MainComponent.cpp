@@ -9,7 +9,7 @@
 #include "MainComponent.h"
 
 // TODO: Env en sound maken per ding (polyfoon)
-// TODO: bpm calc function
+// TODO: custom class for every corner element (trigger, env, buttons)
 
 //==============================================================================
 MainComponent::MainComponent()
@@ -28,9 +28,11 @@ MainComponent::MainComponent()
     
     for (int corner = 0; corner < maxCorners; corner++)
     {
-        addAndMakeVisible(sequencerPointsArray[corner]);
-        sequencerPointsArray[corner].setClickingTogglesState(true);
-        sequencerPointsArray[corner].setToggleState(true, false);
+        addAndMakeVisible(beats[corner].sequencerPoint);
+        beats[corner].sequencerPoint.setClickingTogglesState(true);
+        beats[corner].sequencerPoint.setToggleState(true, false);
+        
+        beats[corner].env.setTimeExp(20, 200);
     }
     
     pointsAmountInputSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
@@ -42,14 +44,10 @@ MainComponent::MainComponent()
     
     bpmSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     bpmSlider.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-    bpmSlider.setRange(40, 300, 1);
+    bpmSlider.setRange(40, 500, 1);
     bpmSlider.setValue(120);
     addAndMakeVisible(bpmSlider);
     bpmSlider.onValueChange = [this] { sliderValueChanged (&bpmSlider);   };
-    
-    // -------------------------------------------------------------------------
-    
-    envelope.setTimeExp(20, 200);
 }
 
 MainComponent::~MainComponent()
@@ -76,16 +74,15 @@ void MainComponent::getNextAudioBlock (const AudioSourceChannelInfo& bufferToFil
         auto currentSample = (float) std::sin (currentAngle);
         currentAngle += angleDelta;
         
-        double theSound = envelope.arExp(currentSample * level, trigger);
-        
+        double theSound = 0;
+        for (int point = 0; point < pointsAmount; point++)
+        {
+            theSound += beats[point].env.arExp(currentSample * level, beats[point].trigger); // pass sound through envelope
+            beats[point].trigger = false; // reset trigger TODO: only do this when necessary
+        }
+                
         leftBuffer[sample]  = theSound;
         rightBuffer[sample] = theSound;
-    }
-    
-    // reset trigger
-    if (trigger == 1)
-    {
-        trigger = 0;
     }
 }
 
@@ -120,7 +117,6 @@ void MainComponent::paint (Graphics& g)
     g.setColour (lightBlue);
     g.setOpacity(0.5);
     g.drawEllipse(circle, 2);
-    //    float circumference = 2 * radius * MathConstants<float>::pi;
     
     // area to draw points
     juce::Rectangle<float> pointArea (4, 4);
@@ -140,9 +136,9 @@ void MainComponent::paint (Graphics& g)
         g.fillEllipse(pointArea);
         
         // set toggles on corners
-        sequencerPointsArray[point].setVisible(true);
-        sequencerPointsArray[point].setBounds(0, 0, 20, 20);
-        sequencerPointsArray[point].setCentrePosition(xValue, yValue);
+        beats[point].sequencerPoint.setVisible(true);
+        beats[point].sequencerPoint.setBounds(0, 0, 20, 20);
+        beats[point].sequencerPoint.setCentrePosition(xValue, yValue);
         
         // line or fill
         if (point == 0)
@@ -157,7 +153,7 @@ void MainComponent::paint (Graphics& g)
     // remove unused toggles
     for (int point = pointsAmount; point < maxCorners; point ++)
     {
-        sequencerPointsArray[point].setVisible(false);
+        beats[point].sequencerPoint.setVisible(false);
     }
     
     path.closeSubPath ();
@@ -204,17 +200,15 @@ void MainComponent::timerCallback()
     currentBeat = (currentBeat + 1) % (int)pointsAmount;
     for (int point = 0; point < pointsAmount; point++)
     {
-        if (sequencerPointsArray[point].getToggleState() == true)
+        if (beats[point].sequencerPoint.getToggleState() == true)
         {
             if (currentBeat == point)
             {
-                // set color
-                sequencerPointsArray[point].setColour(TextButton::buttonOnColourId, red);
-                trigger = true;
+                beats[point].sequencerPoint.setColour(TextButton::buttonOnColourId, red);
+                beats[point].trigger = true;
             }
             else {
-                // set color
-                sequencerPointsArray[point].setColour(TextButton::buttonOnColourId, aqua);
+                beats[point].sequencerPoint.setColour(TextButton::buttonOnColourId, aqua);
             }
         }
     }

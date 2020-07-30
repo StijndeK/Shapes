@@ -10,6 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Envelopes.h"
+#include "Beat.h"
 
 //==============================================================================
 /*
@@ -51,7 +52,6 @@ private:
     int bpmInMs = 600; // 60.000 / bpm(100)
     
     int maxCorners = 14;
-    TextButton sequencerPointsArray[14];
     
     int currentBeat = 0;
             
@@ -64,12 +64,12 @@ private:
     Colour darkBlue = Colour(40, 73, 127);
     Colour red = Colour(196, 74, 78);
     
-    //------------------------------------------------------------
-
     double currentSampleRate = 0.0, currentAngle = 0.0, angleDelta = 0.0;
     void updateAngleDelta();
     
     Envelopes envelope;
+    
+    Beat beats[14];
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
