@@ -6,4 +6,4 @@
 ## Use
 - to experiment with nonlinear and nonhorizontal sequencing
 - to create music with
-- as a sequencer for a plugin/app
+- as a sequencer/controler for a plugin/app
